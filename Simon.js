@@ -82,6 +82,19 @@ Simon = function (config) {
 			me.moveTo(-1000,-1000);
 			overElement = document.elementFromPoint(curPosition[0],curPosition[1]);
 			if (overElement) {
+
+				me.detachEventOn(overElement, "mousedown", true, window, 1,
+					curPosition[0], curPosition[1],
+					curPosition[0], curPosition[1],
+					false, false, false, false, 1, undefined);
+			
+				if (overElement.nodeName === "INPUT") me.triggerBlurFocus(document.activeElement, overElement);
+
+				me.detachEventOn(overElement, "mouseup", true, window, 1,
+					curPosition[0], curPosition[1],
+					curPosition[0], curPosition[1],
+					false, false, false, false, 1, undefined);
+
 				me.detachEventOn(overElement, "click", true, window, 1,
 					curPosition[0], curPosition[1],
 					curPosition[0], curPosition[1],
@@ -131,6 +144,24 @@ Simon = function (config) {
 				elem.fireEvent("on"+type, bubble, viewArg, count, screenX, screenY, clientX, clientY, ctrl, alt, shift, meta, button, related);
 			}
 			window.lastEl = elem;
+		};
+
+		this.triggerBlurFocus = function (blurElem, focusElem) {
+			var me = this,
+				event;
+
+			if (document.createEvent) {
+				event = document.createEvent("HTMLEvents");
+				event.initEvent("focus");
+				focusElem.dispatchEvent(event);
+				event = document.createEvent("HTMLEvents");
+				event.initEvent("blur");
+				blurElem.dispatchEvent(event);
+			} else {
+				event = document.createEventObject("HTMLEvents");
+				focusElem.fireEvent("onfocus");
+				blurElem.fireEvent("onblur");
+			}
 		};
 
 		this.init(config,this);
@@ -248,10 +279,16 @@ sim = new Simon({
 		renderTo: document.body 
 	},
 	says: [
-		5,
+		5, // 5 sek daje na zaladowanie
+		//["pointer","clickXY",200,250],
+		//3,
 		["pointer","dblclickXY",200,220],
-		5,
-		["pointer","clickXY",200,250]
+		2,
+		["pointer","clickXY",550,288],
+		1,
+		//["pointer","clickXY",200,250],
+				1,
+		//["pointer","clickXY",200,200]
 	]});
 
 sim.run();
