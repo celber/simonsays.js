@@ -72,6 +72,10 @@ Simon = function (config) {
 					curPosition[0], curPosition[1],
 					false, false, false, false, 1, undefined);
 			}
+			me.detachEventOn(window, "mousemove", true, window, 0,
+					curPosition[0], curPosition[1],
+					curPosition[0], curPosition[1],
+					false, false, false, false, 1, undefined);
 			return overElement;
 		};
 		this.click = function () {
@@ -156,11 +160,15 @@ Simon = function (config) {
 				focusElem.dispatchEvent(event);
 				event = document.createEvent("HTMLEvents");
 				event.initEvent("blur");
+				focusElem.focus();
+				blurElem.blur();
 				blurElem.dispatchEvent(event);
 			} else {
 				event = document.createEventObject("HTMLEvents");
 				focusElem.fireEvent("onfocus");
+				focusElem.focus();
 				blurElem.fireEvent("onblur");
+				blurElem.blur();
 			}
 		};
 
@@ -284,10 +292,11 @@ sim = new Simon({
 		//3,
 		["pointer","dblclickXY",200,220],
 		2,
-		["pointer","clickXY",550,288],
+		["pointer","clickXY",200,200],
+		["pointer","clickXY",554,287],
 		1,
-		//["pointer","clickXY",200,250],
-				1,
+		["pointer","clickXY",200,250],
+				1
 		//["pointer","clickXY",200,200]
 	]});
 
