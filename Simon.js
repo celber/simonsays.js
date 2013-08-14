@@ -20,9 +20,9 @@ Simon = function (config) {
 			timer: config.timer
 		});
 
-		me.pointer = me.createPointer(pointerConfig);
-		me.keyboard = me.createKeyboard(keyboardConfig);
-		me.queue = me.createQueue(queueConfig);
+		me.pointer = me.createPointer(pointerConfig,me);
+		me.keyboard = me.createKeyboard(keyboardConfig,me);
+		me.queue = me.createQueue(queueConfig,me);
 	};
 
 	this.createPointer = function (config) {
@@ -72,7 +72,7 @@ Simon = function (config) {
 					curPosition[0], curPosition[1],
 					false, false, false, false, 1, undefined);
 			}
-			me.detachEventOn(window, "mousemove", true, window, 0,
+			me.detachEventOn(document, "mousemove", true, window, 0,
 					curPosition[0], curPosition[1],
 					curPosition[0], curPosition[1],
 					false, false, false, false, 1, undefined);
@@ -92,7 +92,8 @@ Simon = function (config) {
 					curPosition[0], curPosition[1],
 					false, false, false, false, 1, undefined);
 			
-				if (overElement.nodeName === "INPUT") me.triggerBlurFocus(document.activeElement, overElement);
+				if (document.activeElement) Simon.browser.blurActiveElement();
+				if (overElement.nodeName === "INPUT") Simon.browser.focusElement(overElement);
 
 				me.detachEventOn(overElement, "mouseup", true, window, 1,
 					curPosition[0], curPosition[1],
@@ -165,7 +166,7 @@ Simon = function (config) {
 				blurElem.dispatchEvent(event);
 			} else {
 				event = document.createEventObject("HTMLEvents");
-				focusElem.fireEvent("onfocus");
+				focusElem.fireEvent("onfocus");keyboard
 				focusElem.focus();
 				blurElem.fireEvent("onblur");
 				blurElem.blur();
@@ -247,6 +248,34 @@ Simon = function (config) {
 
 	this.init(config,this);
 }
+Simon.browser = {
+	blurActiveElement: function () {
+		var event;
+		if (document.createEvent) {
+			event = document.createEvent("HTMLEvents");
+			event.initEvent("blur");
+			document.activeElement.blur();
+			document.activeElement.dispatchEvent(event);
+		} else {
+			event = document.createEventObject("HTMLEvents");
+			document.activeElement.fireEvent("onblur");
+			document.activeElement.blur();
+		}
+	},
+	focusElement: function (input) {
+		var event;
+		if (document.createEvent) {
+			event = document.createEvent("HTMLEvents");
+			event.initEvent("focus");
+			input.dispatchEvent(event);
+			input.focus();
+		} else {
+			event = document.createEventObject();
+			input.fireEvent("onfocus");
+			input.focus();
+		}
+	}
+};
 
 Simon.util = {
 	objectMerge: function (objectA, objectB, throwConflicts) {
@@ -290,13 +319,10 @@ sim = new Simon({
 		5, // 5 sek daje na zaladowanie
 		//["pointer","clickXY",200,250],
 		//3,
-		["pointer","dblclickXY",200,220],
-		2,
-		["pointer","clickXY",200,200],
-		["pointer","clickXY",554,287],
-		1,
-		["pointer","clickXY",200,250],
-				1
+		["pointer","dblclickXY",200,220],2.0,
+		["pointer","clickXY",200,200],0.2,
+		["pointer","clickXY",554,287],1.0,
+		["pointer","clickXY",200,250],1.0
 		//["pointer","clickXY",200,200]
 	]});
 
