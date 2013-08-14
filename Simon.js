@@ -48,18 +48,31 @@ Simon = function (config) {
 			me.container = config.renderTo;
 
 			me.el.src = config.img || "";
-			me.el.style.position = "absolute";
+			me.el.style.position = "fixed";
 			me.moveTo(0,0);
 			me.el.style.zIndex = "11111";
 
 			config.renderTo.appendChild(me.el);
 		};
 		this.moveTo = function (x,y) {
-			var me = this;
+			var me = this,
+				curPosition,
+				overElement;
 				
-				me.position = [x,y];
-				me.el.style.top = y+"px";
-				me.el.style.left = x+"px";
+			me.position = [x,y];
+			me.el.style.top = y+"px";
+			me.el.style.left = x+"px";
+
+
+			curPosition = me.position;
+			overElement = document.elementFromPoint(curPosition[0],curPosition[1]);
+			if (overElement) {
+				me.detachEventOn(overElement, "mouseover", true, window, 0,
+					curPosition[0], curPosition[1],
+					curPosition[0], curPosition[1],
+					false, false, false, false, 1, undefined);
+			}
+			return overElement;
 		};
 		this.click = function () {
 			var me = this,
@@ -68,7 +81,12 @@ Simon = function (config) {
 
 			me.moveTo(-1000,-1000);
 			overElement = document.elementFromPoint(curPosition[0],curPosition[1]);
-			if (overElement) overElement.click();
+			if (overElement) {
+				me.detachEventOn(overElement, "click", true, window, 1,
+					curPosition[0], curPosition[1],
+					curPosition[0], curPosition[1],
+					false, false, false, false, 1, undefined);
+			}
 			me.moveTo.apply(me,curPosition);
 			return overElement;
 		};
@@ -96,8 +114,9 @@ Simon = function (config) {
 			this.moveTo(x,y);
 			this.dblclick();
 		};
-		this.firstbtnclick = function () {};
 		this.secondbtnclick = function () {};
+		this.secondbtnclickXY = function (x, y) {};
+
 		this.detachEventOn = function (elem, type, bubble, viewArg, count, screenX, screenY, clientX, clientY, ctrl, alt, shift, meta, button, related) {
 			var me = this,
 				event;
@@ -111,9 +130,8 @@ Simon = function (config) {
 				event = document.createEventObject("MouseEvent");
 				elem.fireEvent("on"+type, bubble, viewArg, count, screenX, screenY, clientX, clientY, ctrl, alt, shift, meta, button, related);
 			}
-	
+			window.lastEl = elem;
 		};
-		this.destroy = function () {};
 
 		this.init(config,this);
 	}
@@ -231,9 +249,9 @@ sim = new Simon({
 	},
 	says: [
 		5,
-		["pointer","moveTo",20,50], //2*config.timer = 2 seconds
+		["pointer","dblclickXY",200,220],
 		5,
-		["pointer","dblclickXY",200,220]
+		["pointer","clickXY",200,250]
 	]});
 
 sim.run();
