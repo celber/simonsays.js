@@ -422,10 +422,10 @@ window.onload = function() {
         2, // 5 sek daje na zaladowanie
         //["pointer","clickXY",200,250],
         //3,
-        ["pointer", "dblclickXY", 200, 220], 2.0,
+        //["pointer", "dblclickXY", 200, 220], 2.0,
         //["pointer","clickXY",200,200],0.2,
         //	["pointer","clickEl","#radiofield-1122-inputEl"],1.0,
-        ["pointer", "clickEl", "#radiofield-1053-inputEl"], 2.0
+     //   ["pointer", "clickEl", "#radiofield-1053-inputEl"], 2.0
         //["pointer","dragElBy","#slider-1068-thumb-0",{x: 60}],1.0,
         //["pointer","clickXY",1795,308] //487,374
         //wez suwak i przeuń w prawo aż będzie 43.5
