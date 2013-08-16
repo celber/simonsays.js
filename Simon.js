@@ -229,6 +229,7 @@ Simon = function (config) {
 				funcArgs = task,
 				result;
 
+
 			result = function () {
 				me.parent[listener][method].apply(me.parent[listener], funcArgs);
 			}
@@ -304,6 +305,9 @@ Simon.util = {
 	},
 	isNumber: function (value) {
 		return typeof value === 'number' && isFinite(value);
+	},
+	logXY: function() {
+		document.onmousemove = function (e) {console.log("X: ",e.x,"Y: ",e.y)}
 	}
 };
 
@@ -321,9 +325,9 @@ sim = new Simon({
 		//3,
 		["pointer","dblclickXY",200,220],2.0,
 		["pointer","clickXY",200,200],0.2,
-		["pointer","clickXY",554,287],1.0,
-		["pointer","clickXY",200,250],1.0
-		//["pointer","clickXY",200,200]
+		//["pointer","clickEl","#radiofield-1122"],1.0,
+		["pointer","clickXY",200,250],1.0,
+		["pointer","clickXY",1795,308]
 	]});
 
 sim.run();
