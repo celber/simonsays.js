@@ -112,6 +112,15 @@ Simon = function (config) {
 			this.moveTo(x,y);
 			this.click();
 		};
+		this.clickEl = function (query) {
+			var me = this,
+				elements = Simon.util.query(query); 
+
+			elements.each(function (item) {
+				var center = item.getCenterXY();
+				me.clickXY(center.x, center.y);
+			});
+		};
 		this.dblclick = function () {
 			var me = this,
 				curPosition = me.position,
@@ -192,7 +201,6 @@ Simon = function (config) {
 		this.destroy = function () {};
 	}
 
-
 	this.Queue = function (config) {
 
 		this.init = function (config, scope) {
@@ -249,6 +257,52 @@ Simon = function (config) {
 
 	this.init(config,this);
 }
+Simon.Element = function (el) {
+	this.el = el;
+	this.getBox = function () {
+		var me = this;
+		return me.getEl().getBoundingClientRect();
+	};
+	this.getCenterXY = function () {
+		var me = this,
+			box = me.getBox();
+
+		return  {
+			x: box.left+(~~box.width/2),
+			y: box.top+(~~box.height/2)
+		};
+	};
+	this.getEl = function () {
+		var me = this;
+		return me.el;
+	};
+};
+Simon.ElementsArray = function (items) {
+		var i;
+		this.items = [];
+		for (i=0;i<items.length;++i) {
+			this.items.push(new Simon.Element(items[i]));
+		}
+		this.each = function (func,args) {
+			var me=this,
+				i;
+			for (i=0;i<me.items.length;++i) {
+				func.apply(me.getAt[i], Simon.util.arrayMerge(args || [],[me.getAt(i)]));
+			}
+		};
+		this.getAt = function(index) {
+			return this.items[index];
+		};
+		this.first = function () {
+			return this.getAt(0);
+		};
+		this.last = function () {
+			return this.getAt(this.items.length);
+		};
+		this.count = function () {
+			return this.items.legth;
+		};
+	};
 Simon.browser = {
 	blurActiveElement: function () {
 		var event;
@@ -275,6 +329,13 @@ Simon.browser = {
 			input.fireEvent("onfocus");
 			input.focus();
 		}
+	},
+	scrollElBy: function (elem, x, y) {
+		var me = this,
+			elem = Simon.util.query(elem);
+
+
+
 	}
 };
 
@@ -308,6 +369,9 @@ Simon.util = {
 	},
 	logXY: function() {
 		document.onmousemove = function (e) {console.log("X: ",e.x,"Y: ",e.y)}
+	},
+	query: function (query) {
+		return new Simon.ElementsArray(document.querySelectorAll(query));
 	}
 };
 
@@ -326,9 +390,15 @@ sim = new Simon({
 		["pointer","dblclickXY",200,220],2.0,
 		["pointer","clickXY",200,200],0.2,
 		//["pointer","clickEl","#radiofield-1122"],1.0,
-		["pointer","clickXY",200,250],1.0,
-		["pointer","clickXY",1795,308]
-	]});
+		["pointer","clickEl","#radiofield-1053"],1.0,
+		["pointer","dragEl","#slider-1058",{right: 60}],1.0,
+		["pointer","clickXY",1795,308] //487,374
+		//wez suwak i przeuń w prawo aż będzie 43.5
+ 	],
+ 	setup: function () {
+
+ 	}
+ });
 
 sim.run();
 }
