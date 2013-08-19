@@ -109,15 +109,19 @@ var Simon = function(config) {
             vector.incrementX = (x - startPosition.x) /i ;
             vector.incrementY = (y - startPosition.y) / i;
             
-            interval = window.setInterval(function () {
-                if (i > 0) {
-                    me.moveBy(vector.incrementX, vector.incrementY);
-                } else {
-                    me.moveToInstant(x,y);
-                    window.clearInterval(interval);
-                }
-                --i;
-            },friction);
+            
+            Simon.util.interval(function() {
+                me.moveBy(vector.incrementX, vector.incrementY);
+            },friction,i,me.moveToInstant,me,x,y);
+//            interval = window.setInterval(function () {
+//                if (i > 0) {
+//                    me.moveBy(vector.incrementX, vector.incrementY);
+//                } else {
+//                    me.moveToInstant(x,y);
+//                    window.clearInterval(interval);
+//                }
+//                --i;
+//            },friction);
             
             return overElement;
         };
@@ -431,6 +435,22 @@ Simon.util = {
         document.onmousemove = function(e) {
             console.log("X: ", e.x, "Y: ", e.y)
         }
+    },
+    interval: function (func, delay, steps, callback, scope) {
+        var me=this,
+            steps = me.isNumber(steps) ? steps : Infinity,
+            args = Simon.util.objectMerge([],arguments).slice(5);
+            startTime = new Date();
+        
+    while (true && steps) {
+            if (startTime % delay === 0) {
+                func();
+                --steps;
+            }
+        };
+        
+        if (callback) return callback.apply(scope, args);
+        return undefined;
     },
     queryAll: function(query) {
         return new Simon.ElementsArray(document.querySelectorAll(query));
