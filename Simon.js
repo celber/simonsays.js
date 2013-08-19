@@ -31,7 +31,7 @@ var Simon = function(config) {
         return new this.Queue(config);
     };
     this.run = function() {
-        return this.queue.run();
+        return this.queue.next();
     };
     this.browserCompat = function() {
         if (!document.querySelectorAll) {
@@ -88,38 +88,49 @@ var Simon = function(config) {
 			me.detachEventOn(document, "mousemove", true, window, 0, curPosition, curPosition, false, false, false, false, 1, undefined);
 			return overElement;
         };
-        this.moveTo = function(x, y, instant) {
-            var me = this,
+        this.moveToSmooth = function (x, y, speed,friction) {
+        	var me = this,i,
                 startPosition = {
                     x: me.position[0],
                     y: me.position[1]
                 },
-                curPosition, vector = {
+                curPosition,
+                interval,
+                overElement,
+                vector = {
                     len: 0,
                     incrementX: null,
                     incrementY: null
-                },
-                // incrementation means also direction of vector;
-                i, interval, overElement;
+                };
+
+			vector.len = Math.sqrt(Math.pow(Math.abs(x), 2) * Math.pow(Math.abs(y), 2), 2); // pitagoras
+            
+            i = Math.floor(vector.len / speed);
+            vector.incrementX = (x - startPosition.x) /i ;
+            vector.incrementY = (y - startPosition.y) / i;
+            
+            interval = window.setInterval(function () {
+                if (i > 0) {
+                    me.moveBy(vector.incrementX, vector.incrementY);
+                } else {
+                    me.moveToInstant(x,y);
+                    window.clearInterval(interval);
+                }
+                --i;
+            },friction);
+            
+            return overElement;
+        };
+        this.moveTo = function(x, y, instant) {
+            var me = this;
 
             if (instant === true) {
             	return me.moveToInstant(x,y);
             } else {
-                vector.len = Math.sqrt(Math.pow(Math.abs(x), 2) * Math.pow(Math.abs(y), 2), 2); // pitagoras
-                i = Math.floor(vector.len / me.speed);
-                vector.incrementX = Math.floor((startPosition.x + x) / i);
-                vector.incrementY = Math.floor((startPosition.y + y) / i);
-                interval = window.setInterval(function() {
-                    if (i > 0) {
-                        me.moveBy(vector.incrementX, vector.incrementY);
-                    } else {
-                    	me.moveToInstant(x,y);
-                    	window.clearInterval(interval);
-                    }
-                    --i;
-                }, me.friction);
+            	//temporary
+                //return me.moveToInstant(x,y);
+                return me.moveToSmooth(x,y,me.speed, me.friction);
             }
-            return overElement;
         };
         this.click = function() {
             var me = this,
@@ -201,10 +212,10 @@ var Simon = function(config) {
                     x: elemPos.x + by.x,
                     y: elemPos.y + by.y
                 };
-            return me.dragFromTo(elemPos, to)
+            return me.dragFromTo(elemPos, to);
         };
-        this.secondbtnclick = function() {};
-        this.secondbtnclickXY = function(x, y) {};
+//~        this.secondbtnclick = function() {};
+//~        this.secondbtnclickXY = function(x, y) {};
         this.detachEventOn = function(elem, type, bubble, viewArg, count, view, client, ctrl, alt, shift, meta, button, related) {
             var me = this,
                 event;
@@ -256,26 +267,36 @@ var Simon = function(config) {
     }
     this.Queue = function(config) {
         this.init = function(config, scope) {
-            var me = scope;
-            config.timer = Math.abs(config.timer) || 1000;
-            me.parent = config.parent;
-            me.tasks = config.tasks;
-            me.timer = config.timer;
-            me.processes = [];
-        };
-        this.run = function() {
-            var me = this,
-                tasks = me.tasks.reverse(),
+            var me = scope,
                 currentTask, delay = 0,
                 i;
-            for (i = tasks.length - 1; i >= 0; i--) {
-                currentTask = tasks[i];
+            
+            config.timer = Math.abs(config.timer) || 1000;
+            me.parent = config.parent;
+            me.tasks = config.tasks.reverse();
+            me.timer = config.timer;
+            me.steps = [];
+            
+            
+            for (i = me.tasks.length - 1; i >= 0; i--) {
+                currentTask = me.tasks[i];
                 if (Simon.util.isNumber(currentTask)) {
                     delay += currentTask * me.timer;
                 } else {
                     me.add(currentTask, delay);
                 }
             };
+            
+        };
+        this.run = function(task) {
+            var me = this,
+                func = task[0],
+                delay = task[1];
+                me.process = window.setTimeout(function() {
+                    func();
+                    me.next();
+                },delay);
+            return true;
         };
         this.add = function(task, timeout) {
             var me = this,
@@ -286,12 +307,19 @@ var Simon = function(config) {
             result = function() {
                 me.parent[listener][method].apply(me.parent[listener], funcArgs);
             }
-            return me.processes.push(setTimeout(result, timeout));
+            return me.steps.push([result,timeout]);
+        };
+        this.next = function () {
+            var me = this;
+            
+            if (me.steps.length > 0) {
+                return me.run(me.steps.shift());
+            } else {
+                return me.destroy();
+            }
         };
         this.destroy = function() {
-            for (var i = me.processes.length - 1; i >= 0; i--) {
-                window.clearTimeout(me.processes[i]);
-            };
+            return true;
         };
         this.init(config, this);
     }
@@ -414,19 +442,21 @@ Simon.util = {
 window.onload = function() {
     sim = new Simon({
         pointer: {
-            img: "http://dariusz.local/3.10/m_www_lib/simonsays.js/wand.png",
+            img: "http://mbp-dariusz.local/3.10/m_www_lib/simon.js/wand.png",
             width: 20,
             height: 20,
             renderTo: document.body
         },
         says: [
         2, // 5 sek daje na zaladowanie
-        //["pointer","clickXY",200,250],
+        ["pointer","moveTo",200,200],.5,
+            ["pointer","moveTo",100,200],.5,
+        ["pointer","moveTo",200,100],.5
         //3,
-        //["pointer", "dblclickXY", 200, 220], 2.0,
+        //["pointer", "dblclickXY", 200, 220], 1.0,
         //["pointer","clickXY",200,200],0.2,
         //	["pointer","clickEl","#radiofield-1122-inputEl"],1.0,
-     //   ["pointer", "clickEl", "#radiofield-1053-inputEl"], 2.0
+        //["pointer", "clickEl", "#radiofield-1053-inputEl"], .2
         //["pointer","dragElBy","#slider-1068-thumb-0",{x: 60}],1.0,
         //["pointer","clickXY",1795,308] //487,374
         //wez suwak i przeuń w prawo aż będzie 43.5
