@@ -1,4 +1,5 @@
-Simon = function(config) {
+/*global document: false*/
+var Simon = function(config) {
     config.tasks = config.says;
     if (!config.tasks || config.tasks.length == 0) throw "Simon: has nothing to do.";
     config.body = config.body || document.body;
