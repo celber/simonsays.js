@@ -459,29 +459,3 @@ Simon.util = {
         return new Simon.Element(document.querySelector(query));
     }
 };
-window.onload = function() {
-    sim = new Simon({
-        pointer: {
-            img: "http://mbp-dariusz.local/3.10/m_www_lib/simon.js/wand.png",
-            width: 20,
-            height: 20,
-            renderTo: document.body
-        },
-        says: [
-        2, // 5 sek daje na zaladowanie
-        ["pointer","moveTo",200,200],.5,
-            ["pointer","moveTo",100,200],.5,
-        ["pointer","moveTo",200,100],.5
-        //3,
-        //["pointer", "dblclickXY", 200, 220], 1.0,
-        //["pointer","clickXY",200,200],0.2,
-        //	["pointer","clickEl","#radiofield-1122-inputEl"],1.0,
-        //["pointer", "clickEl", "#radiofield-1053-inputEl"], .2
-        //["pointer","dragElBy","#slider-1068-thumb-0",{x: 60}],1.0,
-        //["pointer","clickXY",1795,308] //487,374
-        //wez suwak i przeuń w prawo aż będzie 43.5
-        ],
-        setup: function() {}
-    });
-    sim.run();
-}
