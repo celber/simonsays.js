@@ -110,18 +110,18 @@ var Simon = function(config) {
             vector.incrementY = (y - startPosition.y) / i;
             
             
-            Simon.util.interval(function() {
-                me.moveBy(vector.incrementX, vector.incrementY);
-            },friction,i,me.moveToInstant,me,x,y);
-//            interval = window.setInterval(function () {
-//                if (i > 0) {
-//                    me.moveBy(vector.incrementX, vector.incrementY);
-//                } else {
-//                    me.moveToInstant(x,y);
-//                    window.clearInterval(interval);
-//                }
-//                --i;
-//            },friction);
+//            Simon.util.interval(function() {
+//                me.moveBy(vector.incrementX, vector.incrementY);
+//            },friction,i,me.moveToInstant,me,x,y);
+            interval = window.setInterval(function () {
+                if (i > 0) {
+                    me.moveBy(vector.incrementX, vector.incrementY);
+                } else {
+                    me.moveToInstant(x,y);
+                    window.clearInterval(interval);
+                }
+                --i;
+            },friction);
             
             return overElement;
         };
@@ -167,8 +167,8 @@ var Simon = function(config) {
             var me = this;
             me.detachEventOn(target, "mouseup", true, window, 1, position, position, false, false, false, false, 1, undefined);
         };
-        this.clickXY = function(x, y) {
-            this.moveTo(x, y);
+        this.clickXY = function(x, y,instant) {
+            this.moveTo(x, y, instant);
             this.click();
         };
         this.clickEl = function(query) {
@@ -439,17 +439,23 @@ Simon.util = {
     interval: function (func, delay, steps, callback, scope) {
         var me=this,
             steps = me.isNumber(steps) ? steps : Infinity,
-            args = Simon.util.objectMerge([],arguments).slice(5);
-            startTime = new Date();
+            calleeArgs = Simon.util.objectMerge([],arguments),
+            funcArgs = calleeArgs.slice(5),
+            startTime = new Date(),
+            sleep = function (delay) {
+                var endTime = (new Date()).getTime()+delay;
+                while (true) {
+                    if ((new Date()).getTime() >= endTime) break;
+                } 
+            };
+
+        if (steps > 0) {
+            sleep(delay);
+            --calleeArgs[2];
+            arguments.callee.apply(me,calleeArgs);
+        }
         
-    while (true && steps) {
-            if (startTime % delay === 0) {
-                func();
-                --steps;
-            }
-        };
-        
-        if (callback) return callback.apply(scope, args);
+        if (callback) return callback.apply(scope, funcArgs);
         return undefined;
     },
     queryAll: function(query) {
