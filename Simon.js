@@ -128,6 +128,9 @@ var Simon = function(config) {
         this.moveTo = function(x, y, instant) {
             var me = this;
 
+			//TODO temporary force instant movement;
+			instant = true;
+
             if (instant === true) {
             	return me.moveToInstant(x,y);
             } else {
@@ -465,3 +468,31 @@ Simon.util = {
         return new Simon.Element(document.querySelector(query));
     }
 };
+
+
+window.onload = function() {
+    sim = new Simon({
+        pointer: {
+            img: "resources/img/wand.png",
+            width: 20,
+            height: 20,
+            renderTo: document.body,
+            speed: 100
+        },
+        says: [
+        2, // 5 sek daje na zaladowanie
+        //["pointer","moveTo",200,220],.5
+        //3,
+        ["pointer", "dblclickXY", 200, 220], .1,
+        //["pointer","clickXY",200,200],0.2,
+        
+        ["pointer", "clickEl", "#radiofield-1053-inputEl"], .2,
+        ["pointer","clickEl","#radiofield-1122-inputEl"],.0,
+        //["pointer","dragElBy","#slider-1068-thumb-0",{x: 60}],1.0,
+        //["pointer","clickXY",1795,308] //487,374
+        //wez suwak i przeuń w prawo aż będzie 43.5
+        ],
+        setup: function() {}
+    });
+    sim.run();
+}
